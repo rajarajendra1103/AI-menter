@@ -1,0 +1,5 @@
+{
+  "name": "AI Mentor & Visual Compiler",
+  "description": "An advanced educational platform featuring an AI Notes Generator for coding concepts and a Visual AI Compiler that parses and animates code execution logic using Gemini 3.",
+  "requestFramePermissions": []
+}
