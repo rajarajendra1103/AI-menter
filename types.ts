@@ -55,7 +55,7 @@ export interface CompilerAnalysis {
   mermaidChart: string;
   narration: string[];
   output: string;
-  summary: CodeSummary;
+  summary?: CodeSummary;
   animationData: AnimationData;
 }
 
