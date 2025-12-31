@@ -10,22 +10,35 @@ const MermaidChart: React.FC<MermaidChartProps> = ({ chart, id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Dynamically import mermaid to ensure it works with SSR frameworks if needed,
-    // and to group initialization logic.
     const renderChart = async () => {
       if (containerRef.current && chart) {
         try {
           const mermaid = (await import('mermaid')).default;
-          mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
-          
-          const { svg } = await mermaid.render(`mermaid-${id}`, chart);
+          mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+          // Clean the chart string: remove markdown code blocks like ```mermaid ... ```
+          const cleanChart = chart.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+
+          const uniqueId = `mermaid-${id}-${Date.now()}`;
+          const { svg } = await mermaid.render(uniqueId, cleanChart);
+
           if (containerRef.current) {
             containerRef.current.innerHTML = svg;
           }
         } catch (e) {
           console.error("Mermaid error:", e);
           if (containerRef.current) {
-             containerRef.current.innerHTML = `<p class="text-red-500 text-sm">Failed to render chart</p>`;
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            containerRef.current.innerHTML = `
+               <div class="p-4 text-red-400 bg-red-900/20 rounded border border-red-500/50 text-sm overflow-auto">
+                 <p class="font-bold mb-2">Failed to render flowchart</p>
+                 <p class="font-mono text-xs mb-2">${errorMessage}</p>
+                 <details>
+                   <summary class="cursor-pointer text-xs opacity-70 hover:opacity-100">View Raw Source</summary>
+                   <pre class="mt-2 text-[10px] bg-black/50 p-2 rounded">${chart}</pre>
+                 </details>
+               </div>
+             `;
           }
         }
       }
